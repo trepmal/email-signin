@@ -60,7 +60,7 @@ userPass.remove();
 			$user = get_user_by( 'id', $_REQUEST['user'] );
 			if ( ! $user ) {
 				$error = new WP_Error();
-				$error->add( 'no_user', __( 'user not found', 'email-signin' ) );
+				$error->add( 'no_user', __( 'User not found.', 'email-signin' ) );
 				return $error;
 			}
 
@@ -71,21 +71,21 @@ userPass.remove();
 			// if empty, bail
 			if ( empty( $saved_code ) || empty( $saved_valid ) ) {
 				$error = new WP_Error();
-				$error->add( 'invalid_attempt', __( 'invalid attempt', 'email-signin' ) );
+				$error->add( 'invalid_attempt', __( 'Invalid attempt.', 'email-signin' ) );
 				return $error;
 			}
 
 			// expired?
 			if ( $saved_valid < time() ) {
 				$error = new WP_Error();
-				$error->add( 'code_expired', __( 'code expired', 'email-signin' ) );
+				$error->add( 'code_expired', __( 'Code expired.', 'email-signin' ) );
 				return $error;
 			}
 
 			// match?
 			if ( $saved_code != $_REQUEST['code'] ) {
 				$error = new WP_Error();
-				$error->add( 'code_mismatch', __( 'code mismatch', 'email-signin' ) );
+				$error->add( 'code_mismatch', __( 'Code mismatch.', 'email-signin' ) );
 				return $error;
 			}
 
@@ -105,6 +105,8 @@ userPass.remove();
 
 		// if user doesn't exist, just bail
 		if ( ! $user_obj ) {
+			// since we hid the password field, don't get blocked by a 'password field empty' notice
+			if ( empty( $password ) ) $password = '.';
 			return wp_authenticate_username_password( $user, $username, $password );
 		}
 
@@ -122,7 +124,7 @@ userPass.remove();
 			'user'   => $user_obj->ID,
 			'code'   => $code
 		), site_url('wp-login.php') );
-		$body = sprintf( __( "Click link to sign in\n%s", 'email-signin' ), $link );
+		$body = sprintf( __( "Click link to sign in\n%s\nThis link will be valid till %s.", 'email-signin' ), $link, date( 'r', $valid ) );
 		wp_mail( $user_obj->user_email, __( 'Your sign-in link.', 'email-signin' ), $body );
 
 		// tell user to check their email
